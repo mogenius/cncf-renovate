@@ -10,7 +10,7 @@
       "description": "Automerge patch/minor dev dependencies",
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["patch", "minor"],
-      "automerge": true
+      "automerge": false
     },
     {
       "description": "Group all Helm chart updates",
@@ -21,7 +21,7 @@
     {
       "description": "Pin Docker base images to digest",
       "matchManagers": ["dockerfile"],
-      "pinDigests": true
+      "pinDigests": false
     },
     {
       "description": "Major updates require manual review",
