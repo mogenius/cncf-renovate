@@ -17,7 +17,7 @@ Both parts use the same `renovate.json` configuration, illustrating how Renovate
 cncf-renovate/
 ├── app/                      # Sample Node.js app with intentionally outdated dependencies
 │   ├── Dockerfile            # node:18.12.0-alpine base image
-│   ├── Chart.yaml            # Helm chart with postgresql & redis subcharts
+│   ├── Chart.yaml            # Helm chart with mariadb & memcached subcharts (CloudPirates)
 │   └── package.json          # npm dependencies (express, axios, lodash, etc.)
 │
 ├── operator/                 # Kubernetes operator manifests
@@ -41,27 +41,24 @@ The `app/` directory contains a Node.js application with dependencies pinned to 
 |-----------|------|---------|
 | npm | `package.json` | express 4.18.1, axios 1.3.0 |
 | Docker | `Dockerfile` | node:18.12.0-alpine |
-| Helm | `Chart.yaml` | postgresql 12.1.2, redis 17.3.7 |
+| Helm | `Chart.yaml` | mariadb 0.5.0, memcached 0.7.0 (CloudPirates) |
 
 ## Renovate Configuration Highlights
 
 [renovate.json](renovate.json) demonstrates several common configuration patterns:
 
-- **Schedule**: Runs every weekend, Europe/Berlin timezone
-- **PR limits**: Max 5 concurrent open PRs
-- **Auto-merge**: Patch/minor devDependency updates merge automatically
 - **Grouping**: All Helm chart updates bundled into a single PR
-- **Docker digest pinning**: Base images pinned to `sha256` digests
+- **Docker digest pinning**: Base images pinned to `sha256` digests (disabled for demo)
 - **Major version review**: Major bumps get a `needs-review` label
-- **Vulnerability alerts**: Security PRs automatically labeled
+- **Auto-merge**: Patch/minor devDependency updates (disabled for demo)
 
 ## Running the Demo
 
 ### Prerequisites
 
 **Part 1 (CLI)**
-- Docker
-- A `GITHUB_TOKEN` with repo read access
+- Renovate CLI installed (`npm install -g renovate`)
+- `GH_TOKEN` env var with repo read access
 
 **Part 2 (Operator)**
 - A Kubernetes cluster with the [Renovate Operator](https://github.com/renovatebot/renovate-operator) installed
@@ -70,7 +67,7 @@ The `app/` directory contains a Node.js application with dependencies pinned to 
 ### Part 1 — CLI
 
 ```bash
-export GITHUB_TOKEN=ghp_your_token_here
+export GH_TOKEN=ghp_your_token_here
 bash scripts/demo-cli.sh
 ```
 

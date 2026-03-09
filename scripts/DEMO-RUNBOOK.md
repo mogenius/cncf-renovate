@@ -1,5 +1,9 @@
 # CNCF Webinar — Renovate Demo Runbook
 
+```
+kubectl taint nodes home-flux-test-controlplane-1 node-role.kubernetes.io/control-plane:NoSchedule-
+```
+
 ## Pre-flight Checklist (30 min before)
 - [ ] `export GITHUB_TOKEN=ghp_...` is set
 - [ ] `kubectl get pods -n renovate-system` → all pods Running

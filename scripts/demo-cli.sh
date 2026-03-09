@@ -6,6 +6,8 @@
 # Press ENTER at each pause to advance to the next step.
 # =============================================================
 
+export RENOVATE_GIT_AUTHOR="Renovate Bot <renovate@mogenius.com>"
+
 # ---- Helpers ------------------------------------------------
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -36,18 +38,23 @@ pause() {
 # ---- Intro --------------------------------------------------
 clear
 header "CNCF Webinar — Part 1: Renovate CLI"
-explain "We have a small Node.js service called cncf-demo-app.
-     It ships with a Dockerfile, a Helm chart, and the usual
-     npm dependencies — all intentionally pinned to old versions.
-     Renovate will find every outdated package across all
-     ecosystems in a single pass."
+explain "• Node.js app with npm, Docker, and Helm dependencies
+     • All pinned to old versions — intentionally
+     • Renovate scans all ecosystems in one pass
+     • You only have to install the CLI"
+
+echo ""
+echo ""
+echo "renovate --version"
+renovate --version
+
 pause
 
 # ---- Step 1: Repo layout -----------------------------------
 header "Step 1 — What does our demo app look like?"
-explain "Here is the directory tree. Notice we have three dependency
-     ecosystems side-by-side: npm (package.json), Docker (Dockerfile),
-     and Helm (Chart.yaml). Renovate understands all of them."
+explain "• package.json — npm deps
+     • Dockerfile — base image
+     • Chart.yaml — Helm subcharts"
 
 tree app/
 
@@ -55,10 +62,8 @@ pause
 
 # ---- Step 2: Outdated npm deps ------------------------------
 header "Step 2 — Current npm dependencies (intentionally old)"
-explain "package.json is pinned to specific older versions.
-     For example, express 4.18.1 and lodash 4.17.20 are behind
-     their latest releases. Renovate will open one PR per package
-     (or group them — depending on your config)."
+explain "• Pinned to older versions
+     • Renovate opens one PR per package (grouping possible)"
 
 cat app/package.json
 
@@ -66,10 +71,8 @@ pause
 
 # ---- Step 3: Dockerfile -------------------------------------
 header "Step 3 — Dockerfile base image"
-explain "The Dockerfile uses node:18.12.0-alpine — a specific image tag.
-     Renovate can pin this to a digest for reproducibility, AND
-     open a PR when Node.js 18.x receives a patch update.
-     You get both stability and freshness."
+explain "• node:18.0.0-alpine — outdated tag
+     • Renovate pins to digest + opens PR on patch updates"
 
 cat app/Dockerfile
 
@@ -77,10 +80,8 @@ pause
 
 # ---- Step 4: Helm chart ------------------------------------
 header "Step 4 — Helm chart dependencies"
-explain "Chart.yaml declares postgresql 12.1.2 and redis 17.3.7
-     from the Bitnami registry. These are also outdated.
-     Renovate groups all Helm updates into a single PR — as
-     configured in renovate.json — so you review them together."
+explain "• mariadb 0.5.0 + memcached 0.7.0 — outdated
+     • Renovate groups Helm updates into one PR"
 
 cat app/Chart.yaml
 
@@ -88,13 +89,9 @@ pause
 
 # ---- Step 5: Renovate config --------------------------------
 header "Step 5 — Our Renovate configuration (renovate.json)"
-explain "This is the brain of the setup. Key highlights:
-     • Runs every weekend (schedule: every weekend)
-     • Auto-merges patch/minor devDependency updates
-     • Groups all Helm chart updates into one PR
-     • Pins Docker base images to digest
-     • Flags major updates with a 'needs-review' label
-     • Enables vulnerability alerts out of the box"
+explain "• Auto-merge patch/minor devDeps (disabled for demo)
+     • Group Helm updates into one PR
+     • Label major updates 'needs-review'"
 
 cat renovate.json
 
@@ -102,11 +99,10 @@ pause
 
 # ---- Step 6: Dry-run ----------------------------------------
 header "Step 6 — Renovate dry-run (nothing is written, no PRs opened)"
-explain "We run Renovate with --dry-run=full so you can see exactly
-     what it would do — which PRs it would open, for which packages,
-     with what version bump — without touching a single repository.
-     This is great for testing a new config before going live."
+explain "• --dry-run=full: shows planned PRs without opening them
+     • Safe way to preview config before going live"
 
+echo "renovate --dry-run=full mogenius/cncf-renovate"
 LOG_LEVEL=info renovate \
   --dry-run=full \
   --token="$GH_TOKEN" \
@@ -116,19 +112,18 @@ pause
 
 # ---- Step 7: What would the PRs look like? ------------------
 header "Step 7 — Summary of what Renovate would open"
-explain "Based on the dry-run output above, Renovate would create:
-     • npm:  PRs for express, axios, lodash, winston, jest, eslint, typescript
-     • Docker: PR to pin node:18.12.0-alpine to a sha256 digest
-     • Helm: one grouped PR for postgresql + redis chart updates
-     • Automerge enabled for devDependency patch/minor bumps
-     → Switch to the GitHub UI now to show real PRs from a prior run."
+explain "• npm: PRs for express, axios, lodash, winston, jest, eslint, typescript
+     • Docker: pin node:18.12.0-alpine to sha256 digest
+     • Helm: one grouped PR for mariadb + memcached
+     • devDep patch/minor: automerge
+     → Switch to GitHub UI to show real PRs from a prior run"
 
 pause
 
 # ---- Done ---------------------------------------------------
 header "Part 1 complete — next up: the Renovate Operator"
-explain "The CLI is powerful, but running it by hand doesn't scale
-     when you have dozens of repositories. In Part 2 we'll see how
-     the Renovate Kubernetes Operator automates all of this,
-     natively in your cluster."
+explain "• CLI works great for one repo
+     • Part 2: Renovate Operator — automated, scheduled, cluster-native, at scale"
 echo ""
+
+pause
