@@ -85,7 +85,7 @@ pause
 
 # ---- Step 3: Dockerfile -------------------------------------
 header "Step 3 — Dockerfile base image"
-explain "• node:18.0.0-alpine — outdated tag
+explain "• node:18.12.0-alpine — outdated tag
      • Renovate pins to digest + opens PR on patch updates"
 
 cat app/Dockerfile
@@ -129,7 +129,7 @@ header "Step 7 — Summary of what Renovate would open"
 explain "• npm: PRs for express, axios, lodash, winston, jest, eslint, typescript
      • Docker: pin node:18.12.0-alpine to sha256 digest
      • Helm: one grouped PR for mariadb + memcached
-     • devDep patch/minor: automerge
+     • devDep patch/minor: automerge disabled for demo
      → Switch to GitHub UI to show real PRs from a prior run"
 
 pause

@@ -51,12 +51,11 @@ pause() {
 clear
 header "CNCF Webinar — Part 2: Renovate Operator"
 explain "• CLI doesn't scale beyond a handful of repos
-     • Operator runs on a schedule, inside Kubernetes
-     • Auditable, GitOps-friendly, no external scheduler needed
+     • Operator runs inside Kubernetes — no external scheduler
+     • GitOps-friendly: manage scans as YAML manifests in Git
      • Beautiful UI with dark mode
      • Resource limits, automatic retries
-     • Fully GitOps-compatible
-     • Jobs run parallel, no more waiting for one repo at a time
+     • Jobs run in parallel, no waiting for one repo at a time
      • Same renovate.json config, same PRs, but fully automated"
 pause
 
@@ -73,7 +72,7 @@ pause
 # ---- Step 2: Operator UI ------------------------------------
 header "Step 2 — Renovate Operator UI"
 explain "• Built-in web UI — no extra tooling needed
-     • Shows all jobs, schedules, logs, and scan history
+     • Shows all jobs, logs, and scan history
      • Dark mode included
      → Opening http://localhost:8081 in your browser"
 
@@ -96,14 +95,15 @@ kubectl get crds | grep renovate
 pause
 
 # ---- Step 4: Stream the logs --------------------------------
-header "Step 4 — Live Renovate logs (Ctrl+C to stop)"
-explain "• Same output as CLI — but fully automated inside the cluster
-     • Your RBAC, your secrets, your audit trail"
+header "Step 4 — Trigger a scan and stream the logs"
+explain "• Apply a RenovateJob — operator picks it up immediately
+     • Stream real-time logs from the executor pod
+     • Same log output as the CLI — but running inside your cluster"
 
-kubectl logs -f \
-  -n renovate-operator \
-  -l job-name=scan-cncf-demo
+kubectl delete renovatejob scan-cncf-demo -n renovate-operator --ignore-not-found
+kubectl apply -f operator/renovatejob.yaml
 
+echo ""
 pause
 
 # ---- Step 5: Kubernetes event audit trail -----------------
@@ -119,8 +119,8 @@ pause
 
 # ---- Done ---------------------------------------------------
 header "Part 2 complete"
-explain "• RenovateJob — on-demand, triggerable from CI or GitOps
-     • Secrets via K8s — no plain-text tokens
-     • K8s Events — free audit log
-     • Same renovate.json as CLI — one config, two deployment modes"
+explain "• RenovateJob CRD — define scans as YAML, apply with kubectl or GitOps
+     • Credentials via K8s Secrets — no plain-text tokens
+     • K8s Events — free built-in audit log
+     • Same renovate.json as the CLI — one config, two deployment modes"
 echo ""
