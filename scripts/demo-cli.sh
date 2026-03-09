@@ -23,9 +23,23 @@ header() {
 }
 
 explain() {
-  echo ""
-  echo -e "${YELLOW}  ▶  $1${RESET}"
-  echo ""
+  local lines=()
+  while IFS= read -r line; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [ -n "$line" ] && lines+=("$line")
+  done <<< "$1"
+  printf "\n"
+  local total=${#lines[@]}
+  for ((i=0; i<total; i++)); do
+    printf "${YELLOW}  ▶  ${lines[$i]}${RESET}\n"
+    if [[ $i -lt $((total-1)) ]]; then
+      stty -echo < /dev/tty
+      read -r < /dev/tty
+      stty echo < /dev/tty
+      printf "\033[1A\033[2K\r     ${lines[$i]}\n"
+    fi
+  done
+  printf "\n"
 }
 
 pause() {

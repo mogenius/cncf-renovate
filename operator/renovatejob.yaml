@@ -1,32 +1,20 @@
-apiVersion: renovate.whitesource.io/v1alpha1
+apiVersion: renovate-operator.mogenius.com/v1alpha1
 kind: RenovateJob
 metadata:
   name: scan-cncf-demo
-  namespace: renovate-system
-  annotations:
-    renovate.io/triggered-by: "manual-webinar-demo"
+  namespace: renovate-operator
 spec:
-  # Which repositories to scan
-  repositories:
-    - my-org/cncf-demo-app
-    - my-org/platform-services
-    - my-org/infrastructure
-
-  # Reference to the shared renovate config
-  renovateConfig:
-    configMapRef:
-      name: renovate-config
-      key: renovate.json
-
-  # Credentials
-  secretRef:
-    name: renovate-secrets
-
-  # Resource limits for the Job pod
+  discoveryFilter: mogenius/helm-chart-blueprints
+  extraEnv:
+  - name: RENOVATE_PLATFORM
+    value: github
+  - name: RENOVATE_ENDPOINT
+    value: https://api.github.com/
+  image: renovate/renovate:43.59.5
+  parallelism: 1
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "100m"
-    limits:
-      memory: "512Mi"
-      cpu: "500m"
+      cpu: 100m
+      memory: 128Mi
+  schedule: 0 * * * *
+  secretRef: renovate-secrets

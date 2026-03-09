@@ -22,7 +22,6 @@ cncf-renovate/
 │
 ├── operator/                 # Kubernetes operator manifests
 │   ├── renovatejob.yaml      # On-demand scan (RenovateJob CRD)
-│   ├── renovateschedule.yaml # Scheduled scan every Sunday at 02:00 UTC
 │   └── renovate-secrets.yaml # GitHub token / App credentials
 │
 ├── scripts/
@@ -79,7 +78,7 @@ The script walks through the app structure and then runs Renovate with `--dry-ru
 bash scripts/demo-operator.sh
 ```
 
-The script inspects the running operator, shows the weekly `RenovateSchedule`, applies a `RenovateJob` for an on-demand scan, and streams live logs from the resulting pod.
+The script inspects the running operator, opens the UI, applies a `RenovateJob` for an on-demand scan, and streams live logs from the resulting pod.
 
 See [scripts/DEMO-RUNBOOK.md](scripts/DEMO-RUNBOOK.md) for the full pre-flight checklist and per-step talking points.
 

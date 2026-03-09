@@ -6,7 +6,7 @@ kubectl taint nodes home-flux-test-controlplane-1 node-role.kubernetes.io/contro
 
 ## Pre-flight Checklist (30 min before)
 - [ ] `export GITHUB_TOKEN=ghp_...` is set
-- [ ] `kubectl get pods -n renovate-system` → all pods Running
+- [ ] `kubectl get pods -n renovate-operator` → all pods Running
 - [ ] Demo repo has outdated deps (verify package.json versions!)
 - [ ] GitHub UI open — showing NO Renovate PRs yet
 - [ ] Terminal: Font ≥ 20pt, dark theme, zoom 125%
@@ -20,12 +20,11 @@ kubectl taint nodes home-flux-test-controlplane-1 node-role.kubernetes.io/contro
 5. Transition: *"Now imagine doing this for 100 repos..."*
 
 ## Part 2 — Operator (5 min)
-1. `kubectl get pods -n renovate-system` → *"It's just a pod"* (20 sec)
+1. `kubectl get pods -n renovate-operator` → *"It's just a pod"* (20 sec)
 2. `kubectl get crds | grep renovate` → show CRDs (20 sec)
-3. `cat operator/renovateschedule.yaml` → declarative config (45 sec)
-4. `kubectl apply -f operator/renovatejob.yaml` → trigger run (15 sec)
-5. `kubectl logs -f ...` → live output (60 sec)
-6. `kubectl get events ...` → *"Full audit trail, GitOps-native"* (30 sec)
+3. `kubectl apply -f operator/renovatejob.yaml` → trigger run (15 sec)
+4. `kubectl logs -f ...` → live output (60 sec)
+5. `kubectl get events ...` → *"Full audit trail, GitOps-native"* (30 sec)
 
 ## Key Talking Points
 - "Same renovate.json — CLI and Operator use identical config"

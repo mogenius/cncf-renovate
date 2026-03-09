@@ -21,9 +21,23 @@ header() {
 }
 
 explain() {
-  echo ""
-  echo -e "${YELLOW}  ▶  $1${RESET}"
-  echo ""
+  local lines=()
+  while IFS= read -r line; do
+    line="${line#"${line%%[![:space:]]*}"}"
+    [ -n "$line" ] && lines+=("$line")
+  done <<< "$1"
+  printf "\n"
+  local total=${#lines[@]}
+  for ((i=0; i<total; i++)); do
+    printf "${YELLOW}  ▶  ${lines[$i]}${RESET}\n"
+    if [[ $i -lt $((total-1)) ]]; then
+      stty -echo < /dev/tty
+      read -r < /dev/tty
+      stty echo < /dev/tty
+      printf "\033[1A\033[2K\r     ${lines[$i]}\n"
+    fi
+  done
+  printf "\n"
 }
 
 pause() {
@@ -36,132 +50,68 @@ pause() {
 # ---- Intro --------------------------------------------------
 clear
 header "CNCF Webinar — Part 2: Renovate Operator"
-explain "Running Renovate as a CLI is fine for a single repo.
-     But in a platform team managing 20, 50, 100+ repositories
-     you need something that runs on a schedule, is auditable,
-     and fits into your existing Kubernetes-native workflows.
-     That's what the Renovate Operator gives you."
+explain "• CLI doesn't scale beyond a handful of repos
+     • Operator runs on a schedule, inside Kubernetes
+     • Auditable, GitOps-friendly, no external scheduler needed
+     • Beautiful UI with dark mode
+     • Resource limits, automatic retries
+     • Fully GitOps-compatible
+     • Jobs run parallel, no more waiting for one repo at a time
+     • Same renovate.json config, same PRs, but fully automated"
 pause
 
 # ---- Step 1: Operator is running ----------------------------
-header "Step 1 — The Renovate Operator is already installed"
-explain "The Operator runs as a standard Kubernetes Deployment in
-     the 'renovate-system' namespace. It watches for two custom
-     resources: RenovateJob (one-shot) and RenovateSchedule (cron).
-     Nothing else needed — no external scheduler, no CI pipeline."
+header "Step 1 — Installation"
+explain "• Simply install the helm chart
+     • Runs as a Deployment in renovate-operator namespace
+     • Watches the RenovateJob CRD"
 
-kubectl get pods -n renovate-system
+kubectl get pods -n renovate-operator
 
 pause
 
-# ---- Step 2: Show the CRDs ----------------------------------
-header "Step 2 — Custom Resource Definitions"
-explain "The Operator ships two CRDs:
-     • RenovateJob — trigger an immediate scan of specific repos
-     • RenovateSchedule — run scans on a cron schedule
-     These are first-class Kubernetes objects: you can RBAC them,
-     audit them via Events, and GitOps-manage them like any other manifest."
+# ---- Step 2: Operator UI ------------------------------------
+header "Step 2 — Renovate Operator UI"
+explain "• Built-in web UI — no extra tooling needed
+     • Shows all jobs, schedules, logs, and scan history
+     • Dark mode included
+     → Opening http://localhost:8081 in your browser"
+
+kubectl port-forward -n renovate-operator \
+  svc/renovate-operator-renovate-operator 8081:8081 &
+PF_PID=$!
+sleep 2
+open "http://localhost:8081" 2>/dev/null || xdg-open "http://localhost:8081" 2>/dev/null || true
+
+pause
+kill $PF_PID 2>/dev/null
+
+# ---- Step 3: Show the CRDs ----------------------------------
+header "Step 3 — Custom Resource Definitions"
+explain "• RenovateJob — schedules a scan of specific repos
+     • First-class K8s object: RBAC, GitOps, audit trail"
 
 kubectl get crds | grep renovate
 
 pause
 
-# ---- Step 3: Scheduled scans --------------------------------
-header "Step 3 — What scheduled scans do we have?"
-explain "Let's list all RenovateSchedule objects in the cluster.
-     'weekly-org-scan' covers all four of our platform repositories
-     and runs every Sunday at 02:00. It posts a summary to Slack
-     when it's done — zero manual overhead for the on-call team."
-
-kubectl get renovateschedule -n renovate-system
-
-pause
-
-# ---- Step 4: Describe the schedule -------------------------
-header "Step 4 — Inspect the weekly-org-scan schedule"
-explain "The full spec shows the cron expression, the list of repos,
-     which ConfigMap holds the shared renovate.json, which Secret
-     holds the GitHub App credentials, and the Slack notification config.
-     Everything declarative, everything in Git."
-
-kubectl describe renovateschedule weekly-org-scan -n renovate-system
-
-pause
-
-# ---- Step 5: Show the schedule YAML ------------------------
-header "Step 5 — RenovateSchedule manifest (operator/renovateschedule.yaml)"
-explain "This is the exact YAML we applied to the cluster.
-     Notice: 'schedule: 0 2 * * 0' — every Sunday at 02:00 UTC.
-     The four repos listed are the same ones we scanned with the CLI.
-     The Operator spins up a fresh Renovate Job pod for each run,
-     collects logs, then cleans up — no long-running containers."
-
-cat operator/renovateschedule.yaml
-
-pause
-
-# ---- Step 6: Show the secrets setup -------------------------
-header "Step 6 — Credentials: renovate-secrets"
-explain "Renovate needs a GitHub token (or a GitHub App key for orgs).
-     We store these in a standard Kubernetes Secret and reference
-     them by name from both RenovateJob and RenovateSchedule.
-     The Operator mounts the secret into the Job pod as env vars —
-     credentials never appear in logs or CRD specs."
-
-cat operator/renovate-secrets.yaml
-
-pause
-
-# ---- Step 7: Trigger a manual run --------------------------
-header "Step 7 — Triggering an on-demand scan with RenovateJob"
-explain "Sometimes you want to kick off a scan right now — maybe you
-     just merged a new renovate.json rule and want to see the effect.
-     We apply a RenovateJob manifest that targets three repos.
-     The Operator picks it up immediately and creates a Kubernetes Job."
-
-cat operator/renovatejob.yaml
-echo ""
-explain "Applying the manifest now..."
-
-kubectl apply -f operator/renovatejob.yaml
-
-pause
-
-# ---- Step 8: Watch the pod come up -------------------------
-header "Step 8 — Waiting for the Renovate Job pod to be ready"
-explain "The Operator creates a Job named 'scan-cncf-demo'.
-     We wait for its pod to reach Ready state — this usually takes
-     10-20 seconds while Kubernetes pulls the Renovate image."
-
-kubectl wait --for=condition=ready pod \
-  -l job-name=scan-cncf-demo \
-  -n renovate-system \
-  --timeout=90s
-
-pause
-
-# ---- Step 9: Stream the logs --------------------------------
-header "Step 9 — Live Renovate logs (Ctrl+C to stop following)"
-explain "These are the same logs you'd see from the CLI — repository
-     lookups, version comparisons, PR creation events.
-     The difference: this all happened automatically, inside your
-     cluster, with your RBAC, your secrets, your audit trail.
-     Press Ctrl+C when you've seen enough, then ENTER to continue."
+# ---- Step 4: Stream the logs --------------------------------
+header "Step 4 — Live Renovate logs (Ctrl+C to stop)"
+explain "• Same output as CLI — but fully automated inside the cluster
+     • Your RBAC, your secrets, your audit trail"
 
 kubectl logs -f \
-  -n renovate-system \
+  -n renovate-operator \
   -l job-name=scan-cncf-demo
 
 pause
 
-# ---- Step 10: Kubernetes event audit trail -----------------
-header "Step 10 — Kubernetes Events: the built-in audit trail"
-explain "Every Job creation, pod scheduling, and completion is
-     recorded as a Kubernetes Event. This gives you a free audit
-     log of when scans ran and whether they succeeded — queryable
-     with kubectl, exportable to your observability stack."
+# ---- Step 5: Kubernetes event audit trail -----------------
+header "Step 5 — Kubernetes Events: built-in audit trail"
+explain "• Every scan is recorded as a K8s Event
+     • Queryable with kubectl, exportable to your observability stack"
 
-kubectl get events -n renovate-system \
+kubectl get events -n renovate-operator \
   --sort-by='.lastTimestamp' \
   | tail -20
 
@@ -169,12 +119,8 @@ pause
 
 # ---- Done ---------------------------------------------------
 header "Part 2 complete"
-explain "Recap:
-     • RenovateSchedule  → cron-driven, fire-and-forget org-wide scans
-     • RenovateJob       → on-demand scans, triggerable from CI or GitOps
-     • Credentials via Kubernetes Secrets  → no plain-text tokens in YAML
-     • Kubernetes Events → free audit log of every scan
-     • Same renovate.json config as the CLI — one config, two deployment modes
-
-     Questions?"
+explain "• RenovateJob — on-demand, triggerable from CI or GitOps
+     • Secrets via K8s — no plain-text tokens
+     • K8s Events — free audit log
+     • Same renovate.json as CLI — one config, two deployment modes"
 echo ""
