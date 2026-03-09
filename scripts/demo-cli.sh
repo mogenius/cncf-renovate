@@ -107,11 +107,10 @@ explain "We run Renovate with --dry-run=full so you can see exactly
      with what version bump — without touching a single repository.
      This is great for testing a new config before going live."
 
-renovate \
+LOG_LEVEL=info renovate \
   --dry-run=full \
-  --log-level=info \
   --token="$GH_TOKEN" \
-  my-org/cncf-demo-app
+  mogenius/cncf-renovate
 
 pause
 
