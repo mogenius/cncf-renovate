@@ -103,9 +103,7 @@ pause
 
 # ---- Step 5: Renovate config --------------------------------
 header "Step 5 — Our Renovate configuration (renovate.json)"
-explain "• Auto-merge patch/minor devDeps (disabled for demo)
-     • Group Helm updates into one PR
-     • Label major updates 'needs-review'"
+explain "• Auto-merge patch/minor devDeps (disabled for demo)"
 
 cat renovate.json
 
@@ -125,12 +123,9 @@ LOG_LEVEL=info renovate \
 pause
 
 # ---- Step 7: What would the PRs look like? ------------------
-header "Step 7 — Summary of what Renovate would open"
-explain "• npm: PRs for express, axios, lodash, winston, jest, eslint, typescript
-     • Docker: pin node:18.12.0-alpine to sha256 digest
-     • Helm: one grouped PR for mariadb + memcached
-     • devDep patch/minor: automerge disabled for demo
-     → Switch to GitHub UI to show real PRs from a prior run"
+header "Step 7 — Scripting & Next steps"
+explain "• Create custom scripts to run this periodically in CI or locally
+     • This is where the problems started for us"
 
 pause
 
