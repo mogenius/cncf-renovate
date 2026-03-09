@@ -1,0 +1,32 @@
+apiVersion: renovate.whitesource.io/v1alpha1
+kind: RenovateJob
+metadata:
+  name: scan-cncf-demo
+  namespace: renovate-system
+  annotations:
+    renovate.io/triggered-by: "manual-webinar-demo"
+spec:
+  # Which repositories to scan
+  repositories:
+    - my-org/cncf-demo-app
+    - my-org/platform-services
+    - my-org/infrastructure
+
+  # Reference to the shared renovate config
+  renovateConfig:
+    configMapRef:
+      name: renovate-config
+      key: renovate.json
+
+  # Credentials
+  secretRef:
+    name: renovate-secrets
+
+  # Resource limits for the Job pod
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"

@@ -1,0 +1,30 @@
+apiVersion: renovate.whitesource.io/v1alpha1
+kind: RenovateSchedule
+metadata:
+  name: weekly-org-scan
+  namespace: renovate-system
+spec:
+  # Cron: every Sunday at 02:00
+  schedule: "0 2 * * 0"
+
+  # All repos in the org — or list them explicitly
+  repositories:
+    - my-org/cncf-demo-app
+    - my-org/platform-services
+    - my-org/infrastructure
+    - my-org/data-pipelines
+
+  renovateConfig:
+    configMapRef:
+      name: renovate-config
+      key: renovate.json
+
+  secretRef:
+    name: renovate-secrets
+
+  # Optional: notify a Slack channel on completion
+  notifications:
+    slack:
+      channel: "#platform-updates"
+      secretRef:
+        name: slack-webhook
