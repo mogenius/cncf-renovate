@@ -18,9 +18,9 @@ RESET='\033[0m'
 
 header() {
   echo ""
-  echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+  echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
   echo -e "${BOLD}${CYAN}  $1${RESET}"
-  echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+  echo -e "${BOLD}${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
 }
 
 explain() {
@@ -59,9 +59,9 @@ pause() {
 
 section() {
   echo ""
-  echo -e "${BOLD}${GREEN}════════════════════════════════════════════════════════════${RESET}"
+  echo -e "${BOLD}${GREEN}═══════════════════════════════════════════════════════════════════════════${RESET}"
   echo -e "${BOLD}${GREEN}  $1${RESET}"
-  echo -e "${BOLD}${GREEN}════════════════════════════════════════════════════════════${RESET}"
+  echo -e "${BOLD}${GREEN}═══════════════════════════════════════════════════════════════════════════${RESET}"
   echo ""
 }
 
@@ -96,9 +96,7 @@ pause
 
 # ---- Step 2: npm deps ---------------------------------------
 header "Step 2 — npm dependencies"
-explain "• Express, axios, lodash — all behind current releases
-     • Renovate opens one PR per package by default
-     • Or group them — fully configurable"
+explain ""
 
 run bat app/package.json
 
@@ -106,9 +104,7 @@ pause
 
 # ---- Step 3: Dockerfile -------------------------------------
 header "Step 3 — Docker base image"
-explain "• node:18.12.0-alpine — a specific but outdated tag
-     • Renovate can pin it to a sha256 digest for reproducibility
-     • And open a PR whenever a newer patch is released"
+explain ""
 
 run bat app/Dockerfile
 
@@ -116,9 +112,7 @@ pause
 
 # ---- Step 4: Helm chart ------------------------------------
 header "Step 4 — Helm chart dependencies"
-explain "• mariadb 0.5.0 + memcached 0.7.0 from the CloudPirates OCI registry
-     • Both behind the latest release
-     • Renovate groups all Helm updates into a single PR — configurable"
+explain "• mariadb 0.5.0 + memcached 0.7.0 from the CloudPirates OCI registry"
 
 run bat app/Chart.yaml
 
@@ -126,9 +120,7 @@ pause
 
 # ---- Step 5: Renovate config --------------------------------
 header "Step 5 — renovate.json — the single source of truth"
-explain "• One config file drives everything — all ecosystems, all rules
-     • Group Helm updates, label major bumps, set automerge rules
-     • This same file will work in the CLI and in the Operator"
+explain ""
 
 run bat renovate.json
 
@@ -224,11 +216,14 @@ explain "• One kubectl apply — operator picks it up within seconds
      • Spawns a discovery pod, then parallel executor pods per repo
      • Streams real-time logs — same output as the CLI, but fully automated"
 
-run kubectl delete renovatejob scan-cncf-demo -n renovate-operator --ignore-not-found
-run kubectl apply -f operator/renovatejob.yaml
-
 echo ""
-echo -e "${GRAY}  Waiting for executor pod...${RESET}"
+echo -e "${GRAY}  Waiting for discovery to complete and executor pod to appear...${RESET}"
+until kubectl get pods -n renovate-operator \
+  -l renovate-operator.mogenius.com/job-type=executor \
+  --no-headers 2>/dev/null | grep -q .; do
+  sleep 3
+done
+
 kubectl wait --for=condition=ready pod \
   -l renovate-operator.mogenius.com/job-type=executor \
   -n renovate-operator \
