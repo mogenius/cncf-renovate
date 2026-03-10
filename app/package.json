@@ -4,7 +4,7 @@
   "dependencies": {
     "express": "4.17.0",
     "axios": "1.1.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.23",
     "winston": "3.6.0"
   },
   "devDependencies": {
