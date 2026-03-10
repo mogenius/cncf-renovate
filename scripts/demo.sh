@@ -149,13 +149,6 @@ explain "• For one repo: perfect
 
 pause
 
-header "That's the CLI — powerful, but not built for scale"
-explain "• Great starting point for any team
-     • The config you just saw travels with you
-     • Next: we solve the scaling problem with the Renovate Operator"
-
-pause
-
 # ============================================================
 # PART 2 — RENOVATE OPERATOR
 # ============================================================
@@ -164,10 +157,10 @@ clear
 section "Part 2 — Renovate Operator"
 
 header "Introduction"
-explain "• We built the Renovate Operator to solve exactly the problems we just saw
-     • Kubernetes-native: a single Helm install, a CRD, and you're done
+explain "• Kubernetes-native: a single Helm install, a CRD, and you're done
      • Parallel execution, built-in UI, full observability
-     • Same renovate.json — zero migration cost"
+     • Same renovate.json — zero migration cost
+     • All your K8S work together with the Renovate Operator"
 
 pause
 
@@ -210,34 +203,8 @@ run bat operator/renovatejob.yaml
 
 pause
 
-# ---- Step 4: Run a scan -------------------------------------
-header "Step 4 — Trigger a scan: apply a RenovateJob"
-explain "• One kubectl apply — operator picks it up within seconds
-     • Spawns a discovery pod, then parallel executor pods per repo
-     • Streams real-time logs — same output as the CLI, but fully automated"
-
-echo ""
-echo -e "${GRAY}  Waiting for discovery to complete and executor pod to appear...${RESET}"
-until kubectl get pods -n renovate-operator \
-  -l renovate-operator.mogenius.com/job-type=executor \
-  --no-headers 2>/dev/null | grep -q .; do
-  sleep 3
-done
-
-kubectl wait --for=condition=ready pod \
-  -l renovate-operator.mogenius.com/job-type=executor \
-  -n renovate-operator \
-  --timeout=120s
-
-echo ""
-run kubectl logs -f -n renovate-operator \
-  -l renovate-operator.mogenius.com/job-type=executor \
-  --tail=100
-
-pause
-
-# ---- Step 5: Audit trail ------------------------------------
-header "Step 5 — Kubernetes Events: a free audit log"
+# ---- Step 4: Audit trail ------------------------------------
+header "Step 4 — Kubernetes Events: a free audit log"
 explain "• Every job creation, execution, and completion is recorded
      • No extra logging infrastructure needed
      • Query with kubectl, ship to Loki, Datadog, whatever you use"
@@ -252,6 +219,6 @@ header "Wrap-up"
 explain "• Renovate CLI: perfect for getting started, one repo at a time
      • Renovate Operator: the same tool, built for platform teams at scale
      • One renovate.json — works in both modes, no migration needed
-     • Open source, Kubernetes-native, built by mogenius
+     • Open source, Kubernetes-native, MIT license
      • github.com/mogenius/renovate-operator"
 echo ""

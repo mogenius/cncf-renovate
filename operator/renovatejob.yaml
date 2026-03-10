@@ -4,7 +4,7 @@ metadata:
   name: scan-cncf-demo
   namespace: renovate-operator
 spec:
-  discoveryFilter: mogenius/helm-chart-blueprints
+  discoveryFilter: mogenius/cncf-renovate
   extraEnv:
   - name: RENOVATE_PLATFORM
     value: github
