@@ -4,12 +4,10 @@ metadata:
   name: scan-cncf-demo
   namespace: renovate-operator
 spec:
-  discoveryFilter: mogenius/cncf-renovate
-  extraEnv:
-  - name: RENOVATE_PLATFORM
-    value: github
-  - name: RENOVATE_ENDPOINT
-    value: https://api.github.com/
+  provider:
+    name: github
+  discoveryFilters: 
+    - mogenius/cncf-renovate
   image: renovate/renovate:43.59.5
   parallelism: 1
   resources:

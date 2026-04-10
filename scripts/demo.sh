@@ -160,7 +160,7 @@ header "Introduction"
 explain "• Kubernetes-native: a single Helm install, a CRD, and you're done
      • Parallel execution, built-in UI, full observability
      • Same renovate.json — zero migration cost
-     • All your K8S work together with the Renovate Operator"
+     • Existing K8S tools work together with the Renovate Operator"
 
 pause
 
@@ -210,7 +210,7 @@ explain "• Every job creation, execution, and completion is recorded
      • Query with kubectl, ship to Loki, Datadog, whatever you use"
 
 run kubectl get events -n renovate-operator \
-  --sort-by='.lastTimestamp' | tail -20
+  --sort-by='.lastTimestamp' | tail -10
 
 pause
 
